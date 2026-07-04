@@ -5,6 +5,25 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    description = db.Column(db.Text)
+    price = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(300))
+    stock = db.Column(db.Integer, default=10)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'price': self.price,
+            'image_url': self.image_url,
+            'stock': self.stock,
+        }
+
+
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_name = db.Column(db.String(100), nullable=False)
@@ -29,8 +48,9 @@ class Order(db.Model):
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
-    # No cross-service foreign key: product lives in product-service.
-    # We snapshot product_id + name + price at order time.
+    # We snapshot product_id + name + price at order time rather than joining the
+    # product row, so historical orders stay correct even if a product's price
+    # later changes.
     product_id = db.Column(db.Integer, nullable=False)
     product_name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)

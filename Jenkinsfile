@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SERVICES = 'product-service order-service cart-service gateway'
+        SERVICES = 'api gateway'
     }
 
     stages {
