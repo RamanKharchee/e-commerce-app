@@ -2,6 +2,7 @@ import os
 
 import redis
 from flask import Flask, jsonify, request
+from prometheus_flask_exporter import PrometheusMetrics
 
 from models import db, Product, Order, OrderItem
 from seed import seed_products
@@ -10,6 +11,11 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///shop.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+
+# Exposes GET /metrics and auto-instruments every route with request
+# count / latency (flask_http_request_*), scraped by Prometheus.
+metrics = PrometheusMetrics(app)
+metrics.info('app_info', 'Application info', service='api', version='1.0.0')
 
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 CART_TTL = int(os.environ.get('CART_TTL_SECONDS', 60 * 60 * 24 * 7))  # 7 days

@@ -1,0 +1,26 @@
+groups:
+  - name: ecommerce
+    rules:
+      # Any scrape target unreachable for 1 minute.
+      - alert: TargetDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Target {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been unreachable for over 1 minute."
+
+      # More than 5% of requests to a service returning 5xx over 5 minutes.
+      - alert: HighHttpErrorRate
+        expr: |
+          sum(rate(flask_http_request_total{status=~"5.."}[5m])) by (service)
+          /
+          sum(rate(flask_http_request_total[5m])) by (service)
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.service }}"
+          description: "5xx responses are above 5% of traffic on {{ $labels.service }} over the last 5 minutes."

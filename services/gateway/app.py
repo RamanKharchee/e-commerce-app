@@ -3,9 +3,15 @@ import uuid
 
 import requests
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-me')
+
+# Exposes GET /metrics and auto-instruments every route with request
+# count / latency (flask_http_request_*), scraped by Prometheus.
+metrics = PrometheusMetrics(app)
+metrics.info('app_info', 'Application info', service='gateway', version='1.0.0')
 
 PRODUCT_SERVICE_URL = os.environ.get('PRODUCT_SERVICE_URL', 'http://localhost:8001')
 CART_SERVICE_URL = os.environ.get('CART_SERVICE_URL', 'http://localhost:8003')

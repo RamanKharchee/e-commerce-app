@@ -4,3 +4,4 @@ PyMySQL==1.1.0
 cryptography==42.0.5
 redis==5.0.1
 gunicorn==21.2.0
+prometheus-flask-exporter==0.23.0
